@@ -7,12 +7,12 @@ import com.example.kotlin_shopping_list.domain.ShopListRepository
 import java.lang.RuntimeException
 import java.util.*
 
-object ShopListRepositoryImpl: ShopListRepository {
+object ShopListRepositoryImpl : ShopListRepository {
     private val shopListLiveData = MutableLiveData<List<ShopItem>>()
     private val shopList = mutableListOf<ShopItem>()
 
     init {
-        for (i in 0 until 1000) {
+        for (i in 0 until 5) {
             addItem(ShopItem("Bread $i", enabled = Random().nextBoolean()))
         }
     }
@@ -23,13 +23,14 @@ object ShopListRepositoryImpl: ShopListRepository {
     }
 
     override fun editItem(item: ShopItem) {
-        val index = shopList.indexOfFirst{ it.id === item.id }
+        val index = shopList.indexOfFirst { it.id === item.id }
         shopList[index] = item
         updateList()
     }
 
     override fun getItem(id: UUID): ShopItem {
-        return shopList.find { it.id == id } ?: throw RuntimeException("Element with id $id not found")
+        return shopList.find { it.id == id }
+            ?: throw RuntimeException("Element with id $id not found")
     }
 
     override fun getShopList(): LiveData<List<ShopItem>> {

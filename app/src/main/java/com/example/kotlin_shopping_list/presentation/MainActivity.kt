@@ -1,5 +1,6 @@
 package com.example.kotlin_shopping_list.presentation
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlin_shopping_list.R
+import com.example.kotlin_shopping_list.presentation.ShopItemActivity.Companion.newIntentAddItem
+import com.example.kotlin_shopping_list.presentation.ShopItemActivity.Companion.newIntentEditItem
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
@@ -19,6 +23,11 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             shopListAdapter.submitList(it)
+        }
+        val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
+        buttonAddItem.setOnClickListener {
+            val intent = newIntentAddItem(this)
+            startActivity(intent)
         }
     }
 
@@ -45,6 +54,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupClickListener() {
         shopListAdapter.onShopItemClickListener = {
             Log.d("ITEM_INFO_DATA", it.toString())
+            val intent = newIntentEditItem(this, it.id.toString())
+            startActivity(intent)
         }
     }
 
@@ -55,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSwipeListener(rvShopList: RecyclerView) {
-      val callback = object : SwipeToDeleteCallback(this) {
+        val callback = object : SwipeToDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val itemId = shopListAdapter.currentList[viewHolder.adapterPosition].id
                 viewModel.removeShopItem(itemId)
