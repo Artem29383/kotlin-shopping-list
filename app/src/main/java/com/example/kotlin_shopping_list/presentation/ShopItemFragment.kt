@@ -1,5 +1,6 @@
 package com.example.kotlin_shopping_list.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,6 +22,7 @@ class ShopItemFragment : Fragment() {
     private lateinit var etName: EditText
     private lateinit var etCount: EditText
     private lateinit var buttonSave: Button
+    private lateinit var onFinishListener: OnFinishListener
 
     private lateinit var viewModel: ShopItemViewModel
 
@@ -28,7 +30,18 @@ class ShopItemFragment : Fragment() {
     private var screenMode: String = ""
     private var shopItemId: UUID = UUID(0L, 0L)
 
+    //первым запускается в жизненном цикле
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnFinishListener) {
+            onFinishListener = context
+        } else {
+            throw RuntimeException("method OnFinishListener not found: $context")
+        }
+    }
 
+
+    //третьим запускается в жизненном цикле
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,11 +50,13 @@ class ShopItemFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_shop_item, container, false)
     }
 
+    //вторым запускается в жизненном цикле
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseParams()
     }
 
+    //четвертым запускается в жизненном цикле
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
@@ -81,7 +96,8 @@ class ShopItemFragment : Fragment() {
         }
 
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
-            activity?.onBackPressed()
+//            activity?.onBackPressed()
+            onFinishListener.onFinish()
         }
     }
 
@@ -159,6 +175,10 @@ class ShopItemFragment : Fragment() {
             }
 
         })
+    }
+
+    interface OnFinishListener {
+        fun onFinish()
     }
 
     companion object {

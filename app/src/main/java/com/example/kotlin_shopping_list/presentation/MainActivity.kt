@@ -2,6 +2,7 @@ package com.example.kotlin_shopping_list.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +13,7 @@ import com.example.kotlin_shopping_list.presentation.ShopItemActivity.Companion.
 import com.example.kotlin_shopping_list.presentation.ShopItemActivity.Companion.newIntentEditItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnFinishListener {
     private lateinit var viewModel: MainViewModel
     private lateinit var shopListAdapter: ShopListAdapter
     private var shopItemContainer: FragmentContainerView? = null
@@ -94,5 +95,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         ItemTouchHelper(callback).attachToRecyclerView(rvShopList)
+    }
+
+    override fun onFinish() {
+        Toast.makeText(this, "SUCCESS", Toast.LENGTH_SHORT).show()
+        supportFragmentManager.popBackStack()
     }
 }

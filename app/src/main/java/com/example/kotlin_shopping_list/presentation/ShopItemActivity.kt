@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import com.example.kotlin_shopping_list.R
@@ -16,7 +17,7 @@ import com.google.android.material.textfield.TextInputLayout
 import java.lang.RuntimeException
 import java.util.*
 
-class ShopItemActivity : AppCompatActivity() {
+class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnFinishListener {
     private var screenMode = ""
     private var shopItemId: UUID = UUID(0L, 0L)
 
@@ -80,6 +81,10 @@ class ShopItemActivity : AppCompatActivity() {
             intent.putExtra(EXTRA_SHOP_ITEM_ID, shopItemId)
             return intent
         }
+    }
+
+    override fun onFinish() {
+        finish()
     }
 
     //    private fun observeViewModel() {
