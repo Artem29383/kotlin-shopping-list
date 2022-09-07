@@ -1,48 +1,44 @@
 package com.example.kotlin_shopping_list.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.example.kotlin_shopping_list.domain.ShopItem
 import com.example.kotlin_shopping_list.domain.ShopListRepository
 import java.lang.RuntimeException
 import java.util.*
 
-object ShopListRepositoryImpl : ShopListRepository {
-    private val shopListLiveData = MutableLiveData<List<ShopItem>>()
-    private val shopList = mutableListOf<ShopItem>()
-
-    init {
-        for (i in 0 until 5) {
-            addItem(ShopItem("Bread $i", enabled = Random().nextBoolean()))
-        }
-    }
+class ShopListRepositoryImpl(application: Application) : ShopListRepository {
+    private val shopListDao = AppDatabase.getInstance(application).shopListDao()
+    private val shopListMapper: ShopListMapper = ShopListMapper()
 
     override fun addItem(item: ShopItem) {
-        shopList.add(item)
-        updateList()
+        shopListDao.addShopItem(shopListMapper.mapEntityToDBModel(item))
     }
 
     override fun editItem(item: ShopItem) {
-        val index = shopList.indexOfFirst { it.id === item.id }
-        shopList[index] = item
-        updateList()
+        shopListDao.addShopItem(shopListMapper.mapEntityToDBModel(item))
     }
 
     override fun getItem(id: UUID): ShopItem {
-        return shopList.find { it.id == id }
-            ?: throw RuntimeException("Element with id $id not found")
+        val dbModel = shopListDao.getShopItem(id)
+        return shopListMapper.mapDBModelToEntity(dbModel)
     }
 
-    override fun getShopList(): LiveData<List<ShopItem>> {
-        return shopListLiveData
-    }
+    override fun getShopList(): LiveData<List<ShopItem>> =
+        Transformations.map(shopListDao.getShopList()) {
+            shopListMapper.mapListDBModelToListEntity(it)
+        }
+
+//    override fun getShopList(): LiveData<List<ShopItem>> = MediatorLiveData<List<ShopItem>>().apply {
+//        addSource(shopListDao.getShopList()) {
+//            value = shopListMapper.mapListDBModelToListEntity(it)
+//        }
+//    }
 
     override fun removeItem(id: UUID) {
-        shopList.remove(getItem(id))
-        updateList()
-    }
-
-    private fun updateList() {
-        shopListLiveData.value = shopList.toList()
+        shopListDao.deleteShopItem(id)
     }
 }
