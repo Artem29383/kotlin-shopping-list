@@ -1,15 +1,16 @@
 package com.example.kotlin_shopping_list.presentation
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.example.kotlin_shopping_list.data.ShopListRepositoryImpl
 import com.example.kotlin_shopping_list.domain.AddShopItem
 import com.example.kotlin_shopping_list.domain.EditShopItem
 import com.example.kotlin_shopping_list.domain.GetShopItem
 import com.example.kotlin_shopping_list.domain.ShopItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 
@@ -38,7 +39,9 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
 
 
     fun getShopItem(id: UUID) {
-        _shopItem.value = getShopItemUseCase.getItem(id)
+        viewModelScope.launch {
+            _shopItem.value = getShopItemUseCase.getItem(id)
+        }
     }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
@@ -47,21 +50,24 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         val isValid = validate(name, count)
 
         if (isValid) {
-            addShopItemUseCase.addItem(ShopItem(name, count, true))
-            _shouldCloseScreen.value = Unit
+            viewModelScope.launch {
+                addShopItemUseCase.addItem(ShopItem(name, count, true))
+                _shouldCloseScreen.value = Unit
+            }
         }
     }
 
     fun editShopItem(inputName: String?, inputCount: String?) {
-        // TODO fix
         val name = parseName(inputName)
         val count = parseCount(inputCount)
         val isValid = validate(name, count)
 
         if (isValid) {
-            _shopItem.value?.let {
-                editShopItemUseCase.editItem(it.copy(name = name, count = count))
-                _shouldCloseScreen.value = Unit
+            viewModelScope.launch {
+                _shopItem.value?.let {
+                    editShopItemUseCase.editItem(it.copy(name = name, count = count))
+                    _shouldCloseScreen.value = Unit
+                }
             }
         }
     }
